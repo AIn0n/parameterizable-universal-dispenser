@@ -1,34 +1,29 @@
-# %%
-from copy import deepcopy
-
 from build123d import *
-from ocp_vscode import show
-
-# %%
+from parameterizable_universal_dispenser.configuration import ConfigSchema
 
 
-def universal_item_dispenser(size: int):
-    base_size_x = 10
-    base_size_y = 10
+def universal_item_dispenser(conf: ConfigSchema) -> Part:
+    base_size_x = conf.dispenser_dims.x_mm
+    base_size_y = conf.dispenser_dims.y_mm
     # suwak here
-    circle_r = 0.25
+    circle_r = conf.circles_dims.r_mm
     # suwak here
-    n = 100
-    base_z = 1
-    total_z = 20
+    n = conf.circles_dims.n
+    base_z = conf.dispenser_dims.base_z_mm
+    total_z = conf.item_dims.z_mm * conf.item_dims.count
     # suwak here
-    total_rounding = 1
+    total_rounding = conf.dispenser_dims.corner_rounding_radius_mm
 
-    obj_x = 6
-    obj_y = 8
-    obj_z = 2
+    obj_x = conf.item_dims.x_mm
+    obj_y = conf.item_dims.y_mm
+    obj_z = conf.item_dims.z_mm
 
-    finger_hole_height = 5
-    finger_hole_width = 3
+    finger_hole_height = conf.fingerhole_dims.fingerhole_z
+    finger_hole_width = conf.fingerhole_dims.fingerhole_x
 
-    lid_height = 2
-    lid_margin = 0.2
-    lid_internal_len = 0.5
+    lid_height = conf.lid_dims.z_mm
+    lid_margin = conf.lid_dims.margin_mm
+    lid_internal_len = conf.lid_dims.internal_z_mm
 
     with BuildPart() as dispenser:
         with BuildSketch() as solid_walls:
@@ -50,7 +45,9 @@ def universal_item_dispenser(size: int):
 
         extrude(hole.sketch, amount=-total_z + base_z, mode=Mode.SUBTRACT)
 
-        front_inner_wall = dispenser.faces().filter_by(GeomType.PLANE).sort_by(Axis.X)[0]
+        front_inner_wall = (
+            dispenser.faces().filter_by(GeomType.PLANE).sort_by(Axis.X)[0]
+        )
         plane_inner_wall = Plane(front_inner_wall, z_dir=(-1, 0, 0))
         plane_inner_wall = plane_inner_wall.shift_origin(
             front_inner_wall.edges().sort_by(Axis.Z)[0].center()
@@ -60,7 +57,7 @@ def universal_item_dispenser(size: int):
             RectangleRounded(
                 finger_hole_width,
                 finger_hole_height,
-                radius=finger_hole_width / 2 - 0.01,
+                radius=finger_hole_width / 2 - 0.1,
                 align=(Align.CENTER, Align.MIN),
             )
 
@@ -76,30 +73,13 @@ def universal_item_dispenser(size: int):
 
         with BuildSketch(bottom_face.offset(5 + lid_height)) as lid_internal:
             with Locations((internal_offset_x + lid_margin, 0, 0)):
-                Rectangle(obj_x - lid_margin, obj_y - lid_margin, align=(Align.MIN, Align.CENTER))
+                Rectangle(
+                    obj_x - lid_margin,
+                    obj_y - lid_margin,
+                    align=(Align.MIN, Align.CENTER),
+                )
         extrude(lid_internal.sketch, amount=lid_internal_len)
+
+    assert dispenser.part is not None
+
     return dispenser.part
-
-
-
-# show(universal_item_dispenser(4))
-export_step(universal_item_dispenser(4), "container_v0.step")
-
-# %%
-
-length, thickness = 80.0, 10.0
-
-with BuildPart() as ex19:
-    with BuildSketch() as ex19_sk:
-        RegularPolygon(radius=length / 2, side_count=7)
-    extrude(amount=thickness)
-    topf = ex19.faces().sort_by(Axis.Z)[-1]
-    vtx = topf.vertices().group_by(Axis.X)[-1][0]
-    vtx2Axis = Axis((0, 0, 0), (-1, -0.5, 0))
-    vtx2 = topf.vertices().sort_by(vtx2Axis)[-1]
-    with BuildSketch(topf) as ex19_sk2:
-        with Locations((vtx.X, vtx.Y), (vtx2.X, vtx2.Y)):
-            Circle(radius=length / 8)
-    extrude(amount=-thickness, mode=Mode.SUBTRACT)
-
-show(ex19.part)
