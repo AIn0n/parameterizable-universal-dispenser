@@ -1,4 +1,5 @@
 from build123d import *
+
 from parameterizable_universal_dispenser.configuration import ConfigSchema
 
 
@@ -57,11 +58,11 @@ def universal_item_dispenser(conf: ConfigSchema) -> Part:
             RectangleRounded(
                 finger_hole_width,
                 finger_hole_height,
-                radius=finger_hole_width / 2 - 0.1,
+                radius=finger_hole_width / 4,
                 align=(Align.CENTER, Align.MIN),
             )
 
-        extrude(slot.sketch, amount=-5, mode=Mode.SUBTRACT)
+        extrude(slot.sketch, amount=-100, mode=Mode.SUBTRACT)
 
         bottom_face = dispenser.faces().sort_by(Axis.Z)[0]
         with BuildSketch(bottom_face.offset(5)) as lid_base:
