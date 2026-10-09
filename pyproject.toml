@@ -31,3 +31,7 @@ preview = [
     "jupyter-console>=6.6.3",
     "ocp-vscode>=4.1.0",
 ]
+webpage = [
+    "streamlit>=1.65.0",
+    "streamlit-extras>=1.6.0",
+]
