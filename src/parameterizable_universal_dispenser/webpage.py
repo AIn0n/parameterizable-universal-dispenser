@@ -14,7 +14,7 @@ st.header("Hello world! hehe")
 
 conf = load_config(path=Path("src/configs/default.conf.yaml"))
 
-config_col, preview_col = st.columns(2)
+config_col, preview_col = st.columns([0.3, 0.7])
 st.set_page_config(layout="wide")
 
 with config_col:
@@ -43,6 +43,50 @@ with config_col:
                 "Base height",
                 value=conf.dispenser_dims.base_z_mm,
                 help="Base is the distance between ground and the first item in dispenser",
+            )
+        with st.expander("Item Dimensions"):
+            # TODO: X and Y of item are wrong, fix it
+            conf.item_dims.x_mm = st.number_input(
+                "Width", value=conf.item_dims.x_mm, max_value=conf.dispenser_dims.x_mm
+            )
+            conf.item_dims.y_mm = st.number_input(
+                "Length", value=conf.item_dims.y_mm, max_value=conf.dispenser_dims.y_mm
+            )
+            conf.item_dims.z_mm = st.number_input(
+                "Height",
+                value=conf.item_dims.z_mm,
+                max_value=conf.dispenser_dims.z_mm,
+                help="This value defines how large opening for item will be",
+            )
+
+        with st.expander("Lid Dimensions"):
+            conf.lid_dims.z_mm = st.number_input(
+                "Height", value=conf.lid_dims.z_mm, min_value=0.1
+            )
+            conf.lid_dims.margin_mm = st.slider(
+                "Margin",
+                value=conf.lid_dims.margin_mm,
+                help="margin between lid and dispenser",
+                min_value=0.0,
+                max_value=1.0,
+            )
+
+        with st.expander("Exterior circles dimensions"):
+            conf.circles_dims.r_mm = st.number_input(
+                "Circles radius", value=conf.circles_dims.r_mm, min_value=0.1
+            )
+            conf.circles_dims.n = st.number_input(
+                "Number of circles around dispenser",
+                value=conf.circles_dims.n,
+                min_value=1,
+            )
+
+        with st.expander("finger hole opening dimensions"):
+            conf.fingerhole_dims.fingerhole_x = st.number_input(
+                "Width", value=conf.fingerhole_dims.fingerhole_x, min_value=0.1
+            )
+            conf.fingerhole_dims.fingerhole_z = st.number_input(
+                "Height", value=conf.fingerhole_dims.fingerhole_z, min_value=0.1
             )
 
 
