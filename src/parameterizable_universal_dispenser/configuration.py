@@ -10,7 +10,6 @@ class ItemDimensions:
     x_mm: float = 6
     y_mm: float = 8
     z_mm: float = 2
-    count: int = 10
 
 
 @dataclass
@@ -24,6 +23,7 @@ class DispenserDimensions:
     corner_rounding_radius_mm: float = 1.0
     x_mm: float = 10
     y_mm: float = 10
+    z_mm: float = 10
     base_z_mm: float = 1
 
 

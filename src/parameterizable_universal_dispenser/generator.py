@@ -1,3 +1,5 @@
+import io
+
 from build123d import *
 
 from parameterizable_universal_dispenser.configuration import ConfigSchema
@@ -11,7 +13,7 @@ def universal_item_dispenser(conf: ConfigSchema) -> Part:
     # suwak here
     n = conf.circles_dims.n
     base_z = conf.dispenser_dims.base_z_mm
-    total_z = conf.item_dims.z_mm * conf.item_dims.count
+    total_z = conf.dispenser_dims.z_mm
     # suwak here
     total_rounding = conf.dispenser_dims.corner_rounding_radius_mm
 
@@ -84,3 +86,18 @@ def universal_item_dispenser(conf: ConfigSchema) -> Part:
     assert dispenser.part is not None
 
     return dispenser.part
+
+
+def center_for_preview(part: Part) -> Part:
+    bb = part.bounding_box()
+    center = bb.center()
+    return part.moved(Location((-center.X, -center.Y, -center.Z)))
+
+
+def get_stl_bytes(part: Part) -> bytes:
+    mesher = Mesher()
+    mesher.add_shape(part, linear_deflection=0.001, angular_deflection=0.1)
+
+    stl_stream = io.BytesIO()
+    mesher.write_stream(stl_stream, "stl")
+    return stl_stream.getvalue()
