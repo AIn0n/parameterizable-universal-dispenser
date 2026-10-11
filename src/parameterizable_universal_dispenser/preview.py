@@ -1,7 +1,6 @@
 # %%
 from pathlib import Path
 
-from build123d import *
 from ocp_vscode import show
 
 from parameterizable_universal_dispenser.configuration import load_config
