@@ -4,14 +4,9 @@ import streamlit as st
 from streamlit_extras.three_viewer import three_viewer
 
 from parameterizable_universal_dispenser.configuration import (
-    load_config,
-    serialize_config,
-)
+    load_config, serialize_config)
 from parameterizable_universal_dispenser.generator import (
-    center_for_preview,
-    get_stl_bytes,
-    universal_item_dispenser,
-)
+    center_for_preview, get_stl_bytes, universal_item_dispenser)
 
 st.header("Parameterizable universal dispenser configurator")
 
@@ -37,9 +32,10 @@ with config_col:
                 value=conf.dispenser_dims.y_mm,
                 min_value=conf.item_dims.y_mm,
             )
-            conf.dispenser_dims.corner_rounding_radius_mm = st.number_input(
+            conf.dispenser_dims.corner_rounding_radius_mm = st.slider(
                 "Rounding Radius",
                 value=conf.dispenser_dims.corner_rounding_radius_mm,
+                min_value=.0,
                 max_value=min(conf.dispenser_dims.y_mm, conf.dispenser_dims.x_mm) / 2,
             )
             conf.dispenser_dims.base_z_mm = st.number_input(
@@ -78,10 +74,11 @@ with config_col:
             conf.circles_dims.r_mm = st.number_input(
                 "Circles radius", value=conf.circles_dims.r_mm, min_value=0.1
             )
-            conf.circles_dims.n = st.number_input(
+            conf.circles_dims.n = st.slider(
                 "Number of circles around dispenser",
                 value=conf.circles_dims.n,
-                min_value=1,
+                min_value=30,
+                max_value=175
             )
 
         with st.expander("finger hole opening dimensions"):

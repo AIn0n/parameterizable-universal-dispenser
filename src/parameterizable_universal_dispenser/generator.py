@@ -8,13 +8,10 @@ from parameterizable_universal_dispenser.configuration import ConfigSchema
 def universal_item_dispenser(conf: ConfigSchema) -> Part:
     base_size_x = conf.dispenser_dims.x_mm
     base_size_y = conf.dispenser_dims.y_mm
-    # suwak here
     circle_r = conf.circles_dims.r_mm
-    # suwak here
     n = conf.circles_dims.n
     base_z = conf.dispenser_dims.base_z_mm
     total_z = conf.dispenser_dims.z_mm
-    # suwak here
     total_rounding = conf.dispenser_dims.corner_rounding_radius_mm
 
     obj_x = conf.item_dims.x_mm
