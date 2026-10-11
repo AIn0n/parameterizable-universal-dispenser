@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import cast
 
+import yaml
 from omegaconf import OmegaConf
 
 
@@ -56,3 +57,7 @@ def load_config(path: Path) -> ConfigSchema:
     schema = OmegaConf.structured(ConfigSchema)
     merged = OmegaConf.merge(schema, yaml_config)
     return cast(ConfigSchema, OmegaConf.to_object(merged))
+
+
+def serialize_config(conf: ConfigSchema) -> str:
+    return yaml.dump(asdict(conf), None)

@@ -3,14 +3,17 @@ from pathlib import Path
 import streamlit as st
 from streamlit_extras.three_viewer import three_viewer
 
-from parameterizable_universal_dispenser.configuration import load_config
+from parameterizable_universal_dispenser.configuration import (
+    load_config,
+    serialize_config,
+)
 from parameterizable_universal_dispenser.generator import (
     center_for_preview,
     get_stl_bytes,
     universal_item_dispenser,
 )
 
-st.header("Hello world! hehe")
+st.header("Parameterizable universal dispenser configurator")
 
 conf = load_config(path=Path("src/configs/default.conf.yaml"))
 
@@ -92,7 +95,14 @@ with config_col:
 
 with preview_col:
     part = center_for_preview(universal_item_dispenser(conf))
-
-    three_viewer(
-        get_stl_bytes(part), file_format=".stl", height=600, key="my_model_viewer"
+    stl_bytes = get_stl_bytes(part)
+    three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")
+    st.download_button(
+        "Save STL", data=stl_bytes, file_name="dispenser.stl", mime="model/stl"
+    )
+    st.download_button(
+        "Save .yaml config",
+        data=serialize_config(conf),
+        file_name="dispenser.conf.yaml",
+        mime="text/yaml",
     )
