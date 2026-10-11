@@ -10,6 +10,7 @@ requires-python = ">=3.14"
 dependencies = [
     "build123d>=0.13.0",
     "omegaconf>=2.4.0",
+    "streamlit-extras>=1.6.0",
 ]
 
 [project.scripts]
@@ -33,5 +34,4 @@ preview = [
 ]
 webpage = [
     "streamlit>=1.65.0",
-    "streamlit-extras>=1.6.0",
 ]

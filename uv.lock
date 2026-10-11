@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.14"
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -1272,6 +1272,7 @@ source = { editable = "." }
 dependencies = [
     { name = "build123d" },
     { name = "omegaconf" },
+    { name = "streamlit-extras" },
 ]
 
 [package.optional-dependencies]
@@ -1282,7 +1283,6 @@ preview = [
 ]
 webpage = [
     { name = "streamlit" },
-    { name = "streamlit-extras" },
 ]
 
 [package.dev-dependencies]
@@ -1299,7 +1299,7 @@ requires-dist = [
     { name = "ocp-vscode", marker = "extra == 'preview'", specifier = ">=4.1.0" },
     { name = "omegaconf", specifier = ">=2.4.0" },
     { name = "streamlit", marker = "extra == 'webpage'", specifier = ">=1.65.0" },
-    { name = "streamlit-extras", marker = "extra == 'webpage'", specifier = ">=1.6.0" },
+    { name = "streamlit-extras", specifier = ">=1.6.0" },
 ]
 provides-extras = ["preview", "webpage"]
 
