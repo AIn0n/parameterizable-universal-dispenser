@@ -4,8 +4,8 @@ item_dims:
   z_mm: 3
 
 circles_dims:
-  r_mm: 5
-  n: 60
+  n: 34
+  r_mm: 6.0
 
 lid_dims:
   z_mm: 5
@@ -17,7 +17,8 @@ fingerhole_dims:
   fingerhole_x: 18.0
 
 dispenser_dims:
-  corner_rounding_radius_mm: 10.0
-  x_mm: 60
-  y_mm: 60
-  base_z_mm: 3
+  base_z_mm: 3.0
+  x_mm: 60.0
+  y_mm: 60.0
+  corner_rounding_radius_mm: 10.2
+  z_mm: 40.05
