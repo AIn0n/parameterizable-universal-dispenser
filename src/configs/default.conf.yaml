@@ -22,3 +22,5 @@ dispenser_dims:
   y_mm: 60.0
   corner_rounding_radius_mm: 10.2
   z_mm: 40.05
+
+output_dir: "./build"
