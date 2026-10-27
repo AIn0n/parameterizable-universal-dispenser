@@ -99,12 +99,21 @@ with preview_col:
     part = center_for_preview(universal_item_dispenser(conf))
     stl_bytes = get_stl_bytes(part)
     three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")
-    st.download_button(
-        "Save STL", data=stl_bytes, file_name="dispenser.stl", mime="model/stl"
+
+    first_button_col, second_button_col = st.columns(2)
+
+    first_button_col.download_button(
+        "Save STL",
+        data=stl_bytes,
+        file_name="dispenser.stl",
+        mime="model/stl",
+        width="stretch",
+        type="primary",
     )
-    st.download_button(
+    second_button_col.download_button(
         "Save .yaml config",
         data=serialize_config(conf),
         file_name="dispenser.conf.yaml",
         mime="text/yaml",
+        width="stretch",
     )
