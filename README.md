@@ -50,7 +50,7 @@ UV [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 
 Next clone the repo and move to the directory:
 ```bash
-git clone https://github.com/AIn0n/2Mkb && cd 2Mkb
+git clone https://github.com/AIn0n/parameterizable-universal-dispenser.git && cd parameterizable-universal-dispenser
 ```
 
 
