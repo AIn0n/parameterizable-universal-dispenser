@@ -43,9 +43,7 @@ You will find all the STL files at `build/` directory.
 
 ### Python
 
-System requirements: install `uv` python library.
-
-UV [installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+System requirements: install `uv` python library. Check out [installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 
 
 Next clone the repo and move to the directory:
