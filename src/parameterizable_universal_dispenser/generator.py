@@ -28,13 +28,11 @@ def universal_item_dispenser(conf: ConfigSchema) -> Part:
     with BuildPart() as dispenser:
         with BuildSketch() as solid_walls:
             RectangleRounded(base_size_x, base_size_y, total_rounding)
-        extrude(solid_walls.sketch, amount=total_z)
-
-        locs = [solid_walls.wire().position_at(i / n) for i in range(n)]
-        with BuildSketch() as circles:
+            locs = [solid_walls.wire().position_at(i / n) for i in range(n)]
             with Locations(locs):
                 Circle(circle_r)
-        extrude(circles.sketch, amount=total_z)
+
+        extrude(solid_walls.sketch, amount=total_z)
 
         topf = dispenser.faces().sort_by(Axis.Z)[-1]
         start = topf.vertices().group_by(Axis.X)[0][0]
