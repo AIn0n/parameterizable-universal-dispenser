@@ -90,9 +90,6 @@ with config_col:
 
 
 with preview_col:
-    dispenser, lid = generate_dispenser(conf)
-    download_bytes = prepare_zip_files(dispenser, lid, conf)
-
     option_col, download_col = st.columns(2)
     option_map = {
         PreviewOptions.BOTH: "Both",
@@ -107,9 +104,10 @@ with preview_col:
         default=PreviewOptions.BOTH,
         label_visibility="collapsed",
     )
+    dispenser, lid = generate_dispenser(conf)
     download_col.download_button(
         "Download STL + STEP + .yaml confg",
-        data=download_bytes,
+        data=lambda: prepare_zip_files(dispenser, lid, conf),
         file_name="dispenser.zip",
         mime="model/stl",
         width="stretch",
