@@ -4,7 +4,10 @@ import streamlit as st
 from streamlit_extras.three_viewer import three_viewer
 
 from parameterizable_universal_dispenser.configuration import load_config
-from parameterizable_universal_dispenser.generator import generate_dispenser
+from parameterizable_universal_dispenser.generator import (
+    generate_dispenser,
+    get_min_circles_num,
+)
 from parameterizable_universal_dispenser.helpers import *
 
 st.header("Parameterizable universal dispenser configurator")
@@ -76,7 +79,7 @@ with config_col:
             conf.circles_dims.n = st.slider(
                 "Number of circles around dispenser",
                 value=conf.circles_dims.n,
-                min_value=30,
+                min_value=get_min_circles_num(conf),
                 max_value=175,
             )
 
@@ -103,13 +106,14 @@ with preview_col:
         format_func=lambda opt: option_map[opt],
         default=PreviewOptions.BOTH,
         label_visibility="collapsed",
+        width="stretch",
     )
     dispenser, lid = generate_dispenser(conf)
     download_col.download_button(
         "Download STL + STEP + .yaml confg",
         data=lambda: models_to_zipped_bytes(dispenser, lid, conf),
         file_name="dispenser.zip",
-        mime="model/stl",
+        mime="application/zip",
         width="stretch",
         type="primary",
         icon=":material/download:",

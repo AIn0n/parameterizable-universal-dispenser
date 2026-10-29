@@ -1,21 +1,36 @@
+from math import floor
+
 import build123d as bt
 
 from parameterizable_universal_dispenser.configuration import ConfigSchema
 
 
-def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
-    n = conf.circles_dims.n
-    rec_base = bt.RectangleRounded(
+def _generate_rectangular_base(conf: ConfigSchema):
+    return bt.RectangleRounded(
         conf.dispenser_dims.x_mm,
         conf.dispenser_dims.y_mm,
         conf.dispenser_dims.corner_rounding_radius_mm,
     )
+
+
+def _generate_base_with_circles(conf: ConfigSchema):
+    n = conf.circles_dims.n
+    rec_base = _generate_rectangular_base(conf)
+
     circle_locations = [
         bt.Location(rec_base.wire().position_at(i / n)) for i in range(n)
     ]
     circles = circle_locations * bt.Circle(conf.circles_dims.r_mm)
-    base = rec_base + circles
+    return rec_base + circles
 
+
+def get_min_circles_num(conf: ConfigSchema) -> int:
+    rec_base = _generate_rectangular_base(conf)
+    return floor(rec_base.wire().length / (conf.circles_dims.r_mm * 2)) + 1
+
+
+def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
+    base = _generate_base_with_circles(conf)
     dispenser = bt.extrude(base, amount=conf.dispenser_dims.z_mm)
 
     dispenser_top_face = dispenser.faces().sort_by(bt.Axis.Z)[-1]
@@ -52,7 +67,7 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
     finger_hole_upper_edges = finger_hole_3d.edges().group_by(bt.Axis.Z)[-1]
     finger_hole_upper_edges = finger_hole_upper_edges.sort_by(bt.Axis.X)[:-1]
     dispenser -= finger_hole_3d.fillet(
-        finger_hole_3d.max_fillet(tolerance=0.9, edge_list=finger_hole_upper_edges),
+        finger_hole_3d.max_fillet(tolerance=1, edge_list=finger_hole_upper_edges),
         finger_hole_upper_edges,
     )
     lid = bt.extrude(base, amount=conf.lid_dims.z_mm)
