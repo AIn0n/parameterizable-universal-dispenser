@@ -1,96 +1,82 @@
 import io
 
-from build123d import *
+import build123d as bt
 
 from parameterizable_universal_dispenser.configuration import ConfigSchema
 
 
-def universal_item_dispenser(conf: ConfigSchema) -> Part:
-    base_size_x = conf.dispenser_dims.x_mm
-    base_size_y = conf.dispenser_dims.y_mm
-    circle_r = conf.circles_dims.r_mm
+def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
     n = conf.circles_dims.n
-    base_z = conf.dispenser_dims.base_z_mm
-    total_z = conf.dispenser_dims.z_mm
-    total_rounding = conf.dispenser_dims.corner_rounding_radius_mm
+    rec_base = bt.RectangleRounded(
+        conf.dispenser_dims.x_mm,
+        conf.dispenser_dims.y_mm,
+        conf.dispenser_dims.corner_rounding_radius_mm,
+    )
+    circle_locations = [
+        bt.Location(rec_base.wire().position_at(i / n)) for i in range(n)
+    ]
+    circles = circle_locations * bt.Circle(conf.circles_dims.r_mm)
+    base = rec_base + circles
 
-    obj_x = conf.item_dims.x_mm
-    obj_y = conf.item_dims.y_mm
-    obj_z = conf.item_dims.z_mm
+    dispenser = bt.extrude(base, amount=conf.dispenser_dims.z_mm)
 
-    finger_hole_height = conf.fingerhole_dims.fingerhole_z
-    finger_hole_width = conf.fingerhole_dims.fingerhole_x
+    dispenser_top_face = dispenser.faces().sort_by(bt.Axis.Z)[-1]
 
-    lid_height = conf.lid_dims.z_mm
-    lid_margin = conf.lid_dims.margin_mm
-    lid_internal_len = conf.lid_dims.internal_z_mm
+    hole_base = bt.Plane(dispenser_top_face) * bt.Rectangle(
+        conf.item_dims.x_mm,
+        conf.item_dims.y_mm,
+    )
+    dispenser -= bt.extrude(
+        hole_base,
+        amount=-(conf.dispenser_dims.z_mm - conf.dispenser_dims.base_z_mm),
+        mode=bt.Mode.SUBTRACT,
+    )
+    front_inner_wall = (
+        dispenser.faces().filter_by(bt.GeomType.PLANE).sort_by(bt.Axis.X)[0]
+    )
+    plane_inner_wall = bt.Plane(front_inner_wall).shift_origin(
+        front_inner_wall.edges().sort_by(bt.Axis.Z)[0].center()
+    )
+    item_hole = plane_inner_wall * bt.RectangleRounded(
+        conf.item_dims.y_mm,
+        conf.item_dims.z_mm,
+        radius=0.5,
+        align=(bt.Align.CENTER, bt.Align.MIN),
+    )
+    dispenser -= bt.extrude(item_hole, amount=-100)
 
-    with BuildPart() as dispenser:
-        with BuildSketch() as solid_walls:
-            RectangleRounded(base_size_x, base_size_y, total_rounding)
-            locs = [solid_walls.wire().position_at(i / n) for i in range(n)]
-            with Locations(locs):
-                Circle(circle_r)
+    finger_hole = plane_inner_wall * bt.Rectangle(
+        conf.fingerhole_dims.fingerhole_x,
+        conf.fingerhole_dims.fingerhole_z,
+        align=(bt.Align.CENTER, bt.Align.MIN),
+    )
+    finger_hole_3d = bt.extrude(finger_hole, amount=-100)
+    finger_hole_upper_edges = finger_hole_3d.edges().group_by(bt.Axis.Z)[-1]
+    finger_hole_upper_edges = finger_hole_upper_edges.sort_by(bt.Axis.X)[:-1]
+    dispenser -= finger_hole_3d.fillet(
+        finger_hole_3d.max_fillet(tolerance=0.9, edge_list=finger_hole_upper_edges),
+        finger_hole_upper_edges,
+    )
+    lid = bt.extrude(base, amount=conf.lid_dims.z_mm)
 
-        extrude(solid_walls.sketch, amount=total_z)
+    lid_internal = bt.Rectangle(
+        conf.item_dims.x_mm - conf.lid_dims.margin_mm,
+        conf.item_dims.y_mm - conf.lid_dims.margin_mm,
+    )
 
-        topf = dispenser.faces().sort_by(Axis.Z)[-1]
-        start = topf.vertices().group_by(Axis.X)[0][0]
-        internal_offset_x = start.X + circle_r
-        with BuildSketch(topf) as hole:
-            with Locations((start.X + circle_r, 0, start.Z)):
-                Rectangle(obj_x, obj_y, align=(Align.MIN, Align.CENTER))
+    lid += bt.extrude(lid_internal, amount=-conf.lid_dims.internal_z_mm)
 
-        extrude(hole.sketch, amount=-total_z + base_z, mode=Mode.SUBTRACT)
-
-        front_inner_wall = (
-            dispenser.faces().filter_by(GeomType.PLANE).sort_by(Axis.X)[0]
-        )
-        plane_inner_wall = Plane(front_inner_wall, z_dir=(-1, 0, 0))
-        plane_inner_wall = plane_inner_wall.shift_origin(
-            front_inner_wall.edges().sort_by(Axis.Z)[0].center()
-        )
-        with BuildSketch(plane_inner_wall) as slot:
-            RectangleRounded(obj_y, obj_z, radius=0.5, align=(Align.CENTER, Align.MIN))
-            RectangleRounded(
-                finger_hole_width,
-                finger_hole_height,
-                radius=finger_hole_width / 4,
-                align=(Align.CENTER, Align.MIN),
-            )
-
-        extrude(slot.sketch, amount=-100, mode=Mode.SUBTRACT)
-
-        bottom_face = dispenser.faces().sort_by(Axis.Z)[0]
-        with BuildSketch(bottom_face.offset(5)) as lid_base:
-            RectangleRounded(base_size_x, base_size_y, total_rounding)
-            locs_lid = [lid_base.wire().position_at(i / n) for i in range(n)]
-            with Locations(locs_lid):
-                Circle(circle_r)
-        extrude(lid_base.sketch, amount=lid_height)
-
-        with BuildSketch(bottom_face.offset(5 + lid_height)) as lid_internal:
-            with Locations((internal_offset_x + lid_margin, 0, 0)):
-                Rectangle(
-                    obj_x - lid_margin,
-                    obj_y - lid_margin,
-                    align=(Align.MIN, Align.CENTER),
-                )
-        extrude(lid_internal.sketch, amount=lid_internal_len)
-
-    assert dispenser.part is not None
-
-    return dispenser.part
+    return dispenser, lid
 
 
-def center_for_preview(part: Part) -> Part:
+def center_for_preview(part: bt.Part) -> bt.Part:
     bb = part.bounding_box()
     center = bb.center()
-    return part.moved(Location((-center.X, -center.Y, -center.Z)))
+    return part.moved(bt.Location((-center.X, -center.Y, -center.Z)))
 
 
-def get_stl_bytes(part: Part) -> bytes:
-    mesher = Mesher()
+def get_stl_bytes(part: bt.Part) -> bytes:
+    mesher = bt.Mesher()
     mesher.add_shape(part, linear_deflection=0.001, angular_deflection=0.1)
 
     stl_stream = io.BytesIO()
