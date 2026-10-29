@@ -29,19 +29,7 @@ Step by step:
   - Github Actions should run automatically
 - Download release file
 
-## Locally
-
-### Docker
-
-You can generate models using `Dockerfile.generate`. Modify the default config and run the commands:
-```bash
-docker build -f Dockerfile.generate -t generate:latest .
-docker run --rm -v "$(pwd)/build":"/app/build" generate:latest
-```
-
-You will find all the STL files at `build/` directory.
-
-### Python
+## Generating the models locally
 
 System requirements: install `uv` python library. Check out [installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 
@@ -75,7 +63,7 @@ Run the script:
 uv run generate
 ```
 
-All STLs can be found at `build/` directory.
+All STL and STEP files can be found at `build/` directory.
 
 
 # LICENSE
