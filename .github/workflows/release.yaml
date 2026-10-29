@@ -12,9 +12,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Install yq
-        run: sudo snap install yq
-
       - name: Checkout repository
         uses: actions/checkout@v7
 
@@ -25,10 +22,7 @@ jobs:
           version-file: ".python-version"
 
       - name: Generate STL files
-        run: uv run generate
-
-      - name: Zip STL files
-        run: zip -r parametrizable_universal_dispenser.zip $(yq ".output_dir" ./src/configs/default.conf.yaml)
+        run: uv run generate -z parametrizable_universal_dispenser
 
       - name: Prepare release
         uses: ncipollo/release-action@v1
