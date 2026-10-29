@@ -1,12 +1,14 @@
+import shutil
+import tempfile
+from dataclasses import asdict
 from pathlib import Path
 
+import build123d as bt
 import streamlit as st
+import yaml
 from streamlit_extras.three_viewer import three_viewer
 
-from parameterizable_universal_dispenser.configuration import (
-    load_config,
-    serialize_config,
-)
+from parameterizable_universal_dispenser.configuration import ConfigSchema, load_config
 from parameterizable_universal_dispenser.generator import (
     PreviewOptions,
     generate_dispenser,
@@ -96,39 +98,60 @@ with config_col:
             )
 
 
+def prepare_zip_files(dispenser: bt.Part, lid: bt.Part, conf: ConfigSchema) -> bytes:
+    val = None
+    with (
+        tempfile.TemporaryDirectory() as tmp_models_dir,
+        tempfile.TemporaryDirectory() as tmp_zip_dir,
+    ):
+        bt.export_step(dispenser, f"{tmp_models_dir}/dispenser.step")
+        bt.export_step(lid, f"{tmp_models_dir}/lid.step")
+
+        bt.export_stl(dispenser, f"{tmp_models_dir}/dispenser.stl")
+        bt.export_stl(lid, f"{tmp_models_dir}/lid.stl")
+
+        with open(f"{tmp_models_dir}/config.yaml", "w") as config_file:
+            yaml.dump(asdict(conf), config_file, default_flow_style=False)
+
+        filename = "dispenser"
+        archive_fn = shutil.make_archive(
+            f"{tmp_zip_dir}/{filename}", "zip", tmp_models_dir
+        )
+        with open(archive_fn, "rb") as f:
+            val = f.read()
+
+    assert val is not None
+    return val
+
+
 with preview_col:
+    dispenser, lid = generate_dispenser(conf)
+    download_bytes = prepare_zip_files(dispenser, lid, conf)
+
+    option_col, download_col = st.columns(2)
     option_map = {
         PreviewOptions.BOTH: "Both",
         PreviewOptions.DISPENSER: "Dispenser only",
         PreviewOptions.LID: "Lid only",
     }
 
-    preview_option = st.segmented_control(
+    preview_option = option_col.segmented_control(
         "View",
         options=option_map.keys(),
         format_func=lambda opt: option_map[opt],
         default=PreviewOptions.BOTH,
+        label_visibility="collapsed",
     )
-
-    dispenser, lid = generate_dispenser(conf)
-    part = preview(conf, dispenser, lid, preview_option)
-    stl_bytes = get_stl_bytes(part)
-    three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")
-
-    first_button_col, second_button_col = st.columns(2)
-
-    first_button_col.download_button(
-        "Save STL",
-        data=stl_bytes,
-        file_name="dispenser.stl",
+    download_col.download_button(
+        "Download STL + STEP + .yaml confg",
+        data=download_bytes,
+        file_name="dispenser.zip",
         mime="model/stl",
         width="stretch",
         type="primary",
+        icon=":material/download:",
     )
-    second_button_col.download_button(
-        "Save .yaml config",
-        data=serialize_config(conf),
-        file_name="dispenser.conf.yaml",
-        mime="text/yaml",
-        width="stretch",
-    )
+
+    part = preview(conf, dispenser, lid, preview_option)
+    stl_bytes = get_stl_bytes(part)
+    three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")
