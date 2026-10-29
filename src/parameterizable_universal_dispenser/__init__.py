@@ -10,7 +10,14 @@ from parameterizable_universal_dispenser.helpers import models_to_zip
 
 def arguments_parser() -> ArgumentParser:
     parser = ArgumentParser(prog="Parametizable universal dispenser generator")
-    parser.add_argument("--zip-path", "-z", type=str, required=False, default=None, help="Path to zipped file. If given, the files will be saved into the zip, in given directory.")
+    parser.add_argument(
+        "--zip-path",
+        "-z",
+        type=str,
+        required=False,
+        default=None,
+        help="Path to zipped file. If given, the files will be saved into the zip, in given directory.",
+    )
     parser.add_argument(
         "--config-path",
         "-c",
