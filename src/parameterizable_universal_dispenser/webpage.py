@@ -8,9 +8,10 @@ from parameterizable_universal_dispenser.configuration import (
     serialize_config,
 )
 from parameterizable_universal_dispenser.generator import (
-    center_for_preview,
+    PreviewOptions,
+    generate_dispenser,
     get_stl_bytes,
-    universal_item_dispenser,
+    preview,
 )
 
 st.header("Parameterizable universal dispenser configurator")
@@ -96,7 +97,21 @@ with config_col:
 
 
 with preview_col:
-    part = center_for_preview(universal_item_dispenser(conf))
+    option_map = {
+        PreviewOptions.BOTH: "Both",
+        PreviewOptions.DISPENSER: "Dispenser only",
+        PreviewOptions.LID: "Lid only",
+    }
+
+    preview_option = st.segmented_control(
+        "View",
+        options=option_map.keys(),
+        format_func=lambda opt: option_map[opt],
+        default=PreviewOptions.BOTH,
+    )
+
+    dispenser, lid = generate_dispenser(conf)
+    part = preview(conf, dispenser, lid, preview_option)
     stl_bytes = get_stl_bytes(part)
     three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")
 
