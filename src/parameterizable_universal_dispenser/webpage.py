@@ -1,20 +1,11 @@
-import shutil
-import tempfile
-from dataclasses import asdict
 from pathlib import Path
 
-import build123d as bt
 import streamlit as st
-import yaml
 from streamlit_extras.three_viewer import three_viewer
 
-from parameterizable_universal_dispenser.configuration import ConfigSchema, load_config
-from parameterizable_universal_dispenser.generator import (
-    PreviewOptions,
-    generate_dispenser,
-    get_stl_bytes,
-    preview,
-)
+from parameterizable_universal_dispenser.configuration import load_config
+from parameterizable_universal_dispenser.generator import generate_dispenser
+from parameterizable_universal_dispenser.helpers import *
 
 st.header("Parameterizable universal dispenser configurator")
 
@@ -96,32 +87,6 @@ with config_col:
             conf.fingerhole_dims.fingerhole_z = st.number_input(
                 "Height", value=conf.fingerhole_dims.fingerhole_z, min_value=0.1
             )
-
-
-def prepare_zip_files(dispenser: bt.Part, lid: bt.Part, conf: ConfigSchema) -> bytes:
-    val = None
-    with (
-        tempfile.TemporaryDirectory() as tmp_models_dir,
-        tempfile.TemporaryDirectory() as tmp_zip_dir,
-    ):
-        bt.export_step(dispenser, f"{tmp_models_dir}/dispenser.step")
-        bt.export_step(lid, f"{tmp_models_dir}/lid.step")
-
-        bt.export_stl(dispenser, f"{tmp_models_dir}/dispenser.stl")
-        bt.export_stl(lid, f"{tmp_models_dir}/lid.stl")
-
-        with open(f"{tmp_models_dir}/config.yaml", "w") as config_file:
-            yaml.dump(asdict(conf), config_file, default_flow_style=False)
-
-        filename = "dispenser"
-        archive_fn = shutil.make_archive(
-            f"{tmp_zip_dir}/{filename}", "zip", tmp_models_dir
-        )
-        with open(archive_fn, "rb") as f:
-            val = f.read()
-
-    assert val is not None
-    return val
 
 
 with preview_col:

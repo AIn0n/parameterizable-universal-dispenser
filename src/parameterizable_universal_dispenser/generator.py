@@ -1,6 +1,3 @@
-import io
-from enum import Enum, auto
-
 import build123d as bt
 
 from parameterizable_universal_dispenser.configuration import ConfigSchema
@@ -68,45 +65,3 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
     lid += bt.extrude(lid_internal, amount=-conf.lid_dims.internal_z_mm)
 
     return dispenser, lid
-
-
-class PreviewOptions(Enum):
-    BOTH = auto()
-    DISPENSER = auto()
-    LID = auto()
-
-
-def preview(
-    conf: ConfigSchema,
-    dispenser: bt.Part,
-    lid: bt.Part,
-    previewOptions: PreviewOptions | None = None,
-) -> bt.Part:
-    if previewOptions is None:
-        previewOptions = PreviewOptions.BOTH
-    match previewOptions:
-        case PreviewOptions.BOTH:
-            distance = (
-                conf.dispenser_dims.z_mm
-                + conf.lid_dims.z_mm
-                + conf.lid_dims.internal_z_mm
-                + 10
-            )
-            part = dispenser + (bt.Pos(0, 0, distance) * lid)
-        case PreviewOptions.DISPENSER:
-            part = dispenser
-        case PreviewOptions.LID:
-            part = lid
-
-    bb = part.bounding_box()
-    center = bb.center()
-    return part.moved(bt.Location((-center.X, -center.Y, -center.Z)))
-
-
-def get_stl_bytes(part: bt.Part) -> bytes:
-    mesher = bt.Mesher()
-    mesher.add_shape(part, linear_deflection=0.001, angular_deflection=0.1)
-
-    stl_stream = io.BytesIO()
-    mesher.write_stream(stl_stream, "stl")
-    return stl_stream.getvalue()
