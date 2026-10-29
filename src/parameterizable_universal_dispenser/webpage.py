@@ -107,7 +107,7 @@ with preview_col:
     dispenser, lid = generate_dispenser(conf)
     download_col.download_button(
         "Download STL + STEP + .yaml confg",
-        data=lambda: prepare_zip_files(dispenser, lid, conf),
+        data=lambda: models_to_zipped_bytes(dispenser, lid, conf),
         file_name="dispenser.zip",
         mime="model/stl",
         width="stretch",

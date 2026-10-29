@@ -10,25 +10,29 @@ import yaml
 from parameterizable_universal_dispenser.configuration import ConfigSchema
 
 
-def prepare_zip_files(dispenser: bt.Part, lid: bt.Part, conf: ConfigSchema) -> bytes:
-    val = None
-    with (
-        tempfile.TemporaryDirectory() as tmp_models_dir,
-        tempfile.TemporaryDirectory() as tmp_zip_dir,
-    ):
+def models_to_zip(
+    dispenser: bt.Part, lid: bt.Part, output_path: str, conf: ConfigSchema | None = None
+) -> str:
+    with tempfile.TemporaryDirectory() as tmp_models_dir:
         bt.export_step(dispenser, f"{tmp_models_dir}/dispenser.step")
         bt.export_step(lid, f"{tmp_models_dir}/lid.step")
 
         bt.export_stl(dispenser, f"{tmp_models_dir}/dispenser.stl")
         bt.export_stl(lid, f"{tmp_models_dir}/lid.stl")
 
-        with open(f"{tmp_models_dir}/config.yaml", "w") as config_file:
-            yaml.dump(asdict(conf), config_file, default_flow_style=False)
+        if conf:
+            with open(f"{tmp_models_dir}/config.yaml", "w") as config_file:
+                yaml.dump(asdict(conf), config_file, default_flow_style=False)
 
-        filename = "dispenser"
-        archive_fn = shutil.make_archive(
-            f"{tmp_zip_dir}/{filename}", "zip", tmp_models_dir
-        )
+        return shutil.make_archive(output_path, "zip", tmp_models_dir)
+
+
+def models_to_zipped_bytes(
+    dispenser: bt.Part, lid: bt.Part, conf: ConfigSchema
+) -> bytes:
+    val = None
+    with tempfile.TemporaryDirectory() as tmp_zip_dir:
+        archive_fn = models_to_zip(dispenser, lid, f"{tmp_zip_dir}/dispenser", conf)
         with open(archive_fn, "rb") as f:
             val = f.read()
 
