@@ -63,5 +63,4 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
     )
 
     lid += bt.extrude(lid_internal, amount=-conf.lid_dims.internal_z_mm)
-
-    return dispenser, lid
+    return dispenser, bt.Rot(180, 0, 0) * lid

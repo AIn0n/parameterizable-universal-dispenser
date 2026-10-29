@@ -58,11 +58,11 @@ def preview(
                 + conf.lid_dims.internal_z_mm
                 + 10
             )
-            part = dispenser + (bt.Pos(0, 0, distance) * lid)
+            part = dispenser + (bt.Pos(0, 0, distance) * bt.Rot(180, 0, 0) * lid)
         case PreviewOptions.DISPENSER:
             part = dispenser
         case PreviewOptions.LID:
-            part = lid
+            part = bt.Rot(180, 0, 0) * lid
 
     bb = part.bounding_box()
     center = bb.center()
