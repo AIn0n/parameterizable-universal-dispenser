@@ -119,6 +119,6 @@ with preview_col:
         icon=":material/download:",
     )
 
-    part = preview(conf, dispenser, lid, preview_option)
+    part = preview(conf, dispenser, lid, preview_option, True)
     stl_bytes = get_stl_bytes(part)
     three_viewer(stl_bytes, file_format=".stl", height=600, key="my_model_viewer")

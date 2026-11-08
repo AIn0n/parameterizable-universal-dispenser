@@ -51,6 +51,7 @@ def preview(
     dispenser: bt.Part,
     lid: bt.Part,
     previewOptions: PreviewOptions | None = None,
+    rotate: bool = False,
 ) -> bt.Part:
     if previewOptions is None:
         previewOptions = PreviewOptions.BOTH
@@ -70,7 +71,10 @@ def preview(
 
     bb = part.bounding_box()
     center = bb.center()
-    return part.moved(bt.Location((-center.X, -center.Y, -center.Z)))
+    moved = part.moved(bt.Location((-center.X, -center.Y, -center.Z)))
+    if rotate:
+        return bt.Rot(bt.Axis.X, -90) * moved
+    return moved
 
 
 def get_stl_bytes(part: bt.Part) -> bytes:
