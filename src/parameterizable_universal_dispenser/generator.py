@@ -35,9 +35,10 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
 
     dispenser_top_face = dispenser.faces().sort_by(bt.Axis.Z)[-1]
 
-    hole_base = bt.Plane(dispenser_top_face) * bt.Rectangle(
+    hole_base = bt.Plane(dispenser_top_face) * bt.RectangleRounded(
         conf.item_dims.x_mm,
         conf.item_dims.y_mm,
+        radius=conf.dispenser_dims.inner_rounding_radius_mm,
     )
     dispenser -= bt.extrude(
         hole_base,
@@ -72,9 +73,10 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
     )
     lid = bt.extrude(base, amount=conf.lid_dims.z_mm)
 
-    lid_internal = bt.Rectangle(
+    lid_internal = bt.RectangleRounded(
         conf.item_dims.x_mm - conf.lid_dims.margin_mm,
         conf.item_dims.y_mm - conf.lid_dims.margin_mm,
+        radius=conf.dispenser_dims.inner_rounding_radius_mm,
     )
 
     lid += bt.extrude(lid_internal, amount=-conf.lid_dims.internal_z_mm)

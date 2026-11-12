@@ -21,6 +21,7 @@ class CirclesDimensions:
 @dataclass
 class DispenserDimensions:
     corner_rounding_radius_mm: float = 1.0
+    inner_rounding_radius_mm: float = 1.0
     x_mm: float = 10
     y_mm: float = 10
     z_mm: float = 10
