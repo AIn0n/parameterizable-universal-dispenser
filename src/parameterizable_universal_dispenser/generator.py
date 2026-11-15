@@ -78,6 +78,14 @@ def generate_dispenser(conf: ConfigSchema) -> tuple[bt.Part, bt.Part]:
         conf.item_dims.y_mm - conf.lid_dims.margin_mm,
         radius=conf.dispenser_dims.inner_rounding_radius_mm,
     )
-
-    lid += bt.extrude(lid_internal, amount=-conf.lid_dims.internal_z_mm)
+    lid_internal_extruded = bt.extrude(
+        lid_internal, amount=-conf.lid_dims.internal_z_mm
+    )
+    lid_internal_extruded_faces = lid_internal_extruded.faces().sort_by(bt.Axis.Z)
+    lid_internal_extruded = bt.offset(
+        lid_internal_extruded,
+        amount=-conf.lid_dims.internal_wall_thickness_mm,
+        openings=[lid_internal_extruded_faces[0], lid_internal_extruded_faces[-1]],
+    )
+    lid += lid_internal_extruded
     return dispenser, bt.Rot(180, 0, 0) * lid
