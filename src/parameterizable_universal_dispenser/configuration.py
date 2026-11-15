@@ -34,6 +34,7 @@ class LidDimensions:
     margin_mm: float = 0.2
     internal_z_mm: float = 0.5
     internal_wall_thickness_mm: float = 2.0
+    internal_wall_angle_degress: float = 5.0
 
 
 @dataclass

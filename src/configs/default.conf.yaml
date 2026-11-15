@@ -11,6 +11,8 @@ lid_dims:
   z_mm: 5
   margin_mm: 0.2
   internal_z_mm: 3
+  internal_wall_angle_degress: 5.0
+  internal_wall_thickness_mm: 2.0
 
 fingerhole_dims:
   fingerhole_z: 20.0
