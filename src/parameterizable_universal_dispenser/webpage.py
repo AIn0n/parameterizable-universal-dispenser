@@ -71,6 +71,25 @@ with config_col:
                 min_value=0.0,
                 max_value=1.0,
             )
+            conf.lid_dims.internal_z_mm = st.number_input(
+                "Internal wall height",
+                value=conf.lid_dims.internal_z_mm,
+                min_value=0.1,
+                max_value=conf.dispenser_dims.z_mm - conf.dispenser_dims.base_z_mm,
+            )
+            conf.lid_dims.internal_wall_angle_degress = st.slider(
+                "Internal wall angle (degress)",
+                value=conf.lid_dims.internal_wall_angle_degress,
+                min_value=0.0,
+                max_value=10.0,
+                step=0.2,
+            )
+            conf.lid_dims.internal_wall_thickness_mm = st.slider(
+                "Internal wall thickness",
+                value=conf.lid_dims.internal_wall_thickness_mm,
+                min_value=0.2,
+                max_value=min(conf.item_dims.x_mm, conf.item_dims.y_mm) / 2.0,
+            )
 
         with st.expander("Exterior circles dimensions"):
             conf.circles_dims.r_mm = st.number_input(
